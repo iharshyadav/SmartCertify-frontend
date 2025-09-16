@@ -1,3 +1,4 @@
+"use client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -16,11 +17,34 @@ import {
   Zap,
 } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function HomePage() {
+  
+  const router = useRouter();
+
+  async function verifyCertificate(certId: string) {
+    const response = await fetch("http://localhost:8000", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        tool: "echo",
+        input: {
+          message: "Hello from frontend",
+        },
+      }),
+    });
+
+    const data = await response.json();
+    console.log(data);
+
+    return data;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      {/* Enhanced Navigation */}
       <nav className="border-b border-white/10 bg-white/70 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
@@ -69,22 +93,23 @@ export default function HomePage() {
 
             <div className="hidden md:flex items-center space-x-4">
               <Button
+                onClick={() => router.push('/signin')}
                 variant="ghost"
                 size="sm"
-                className="text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
+                className="text-gray-700 cursor-pointer hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
               >
                 Sign In
               </Button>
               <Button
+              onClick={() => router.push('/signup')}
                 size="sm"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 px-6"
+                className="bg-gradient-to-r cursor-pointer from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 px-6"
               >
                 Get Started
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
 
-            {/* Mobile Menu Button */}
             <div className="md:hidden">
               <Button variant="ghost" size="sm">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +121,6 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <div className="flex justify-center mb-6">
@@ -118,7 +142,7 @@ export default function HomePage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 text-lg px-8 py-6">
+            <Button onClick={() => verifyCertificate("djnvnjdvbhddbvvh")}  size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 text-lg px-8 py-6">
               <Upload className="w-5 h-5 mr-2" />
               Upload Certificate
             </Button>
@@ -128,7 +152,6 @@ export default function HomePage() {
             </Button>
           </div>
 
-          {/* Hero Image Placeholder */}
           <div className="relative max-w-4xl mx-auto">
             <div className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-2xl p-8 shadow-2xl">
               <div className="bg-white rounded-xl p-6 shadow-lg">
@@ -160,7 +183,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="py-20 px-4 bg-white">
         <div className="container mx-auto">
           <div className="text-center mb-16">
@@ -340,7 +362,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How It Works Section */}
       <section id="how-it-works" className="py-20 px-4 bg-gradient-to-br from-blue-50 to-purple-50">
         <div className="container mx-auto">
           <div className="text-center mb-16">
@@ -386,7 +407,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-20 px-4 bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="container mx-auto text-center text-white">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Revolutionize Certificate Management?</h2>
@@ -410,9 +430,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Enhanced Footer */}
       <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white relative overflow-hidden">
-        {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div
             className="absolute inset-0"
@@ -423,7 +441,6 @@ export default function HomePage() {
         </div>
 
         <div className="relative">
-          {/* Newsletter Section */}
           <div className="border-b border-gray-700/50 py-12">
             <div className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto text-center">
@@ -448,11 +465,9 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Main Footer Content */}
           <div className="py-16 px-4">
             <div className="container mx-auto">
               <div className="grid lg:grid-cols-5 md:grid-cols-2 gap-8">
-                {/* Brand Section */}
                 <div className="lg:col-span-2">
                   <div className="flex items-center space-x-3 mb-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
@@ -470,7 +485,6 @@ export default function HomePage() {
                     certificate management and verification.
                   </p>
 
-                  {/* Social Links */}
                   <div className="flex space-x-4">
                     <a
                       href="#"
@@ -523,7 +537,6 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Product Links */}
                 <div>
                   <h4 className="font-bold text-lg mb-6 text-white">Product</h4>
                   <ul className="space-y-3">
@@ -575,7 +588,6 @@ export default function HomePage() {
                   </ul>
                 </div>
 
-                {/* Solutions Links */}
                 <div>
                   <h4 className="font-bold text-lg mb-6 text-white">Solutions</h4>
                   <ul className="space-y-3">
@@ -627,7 +639,6 @@ export default function HomePage() {
                   </ul>
                 </div>
 
-                {/* Support Links */}
                 <div>
                   <h4 className="font-bold text-lg mb-6 text-white">Support</h4>
                   <ul className="space-y-3">
@@ -682,7 +693,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Bottom Bar */}
           <div className="border-t border-gray-700/50 py-8">
             <div className="container mx-auto px-4">
               <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
