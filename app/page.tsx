@@ -1,4 +1,5 @@
 "use client"
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -15,13 +16,15 @@ import {
   Sparkles,
   Lock,
   Zap,
+  Loader2,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useAuthState } from "@/lib/auth-context"
 
 export default function HomePage() {
-  
-  const router = useRouter();
+  const router = useRouter()
+  const { isAuthenticated, isLoading, user } = useAuthState()
 
   async function verifyCertificate(certId: string) {
     const response = await fetch("http://localhost:8000", {

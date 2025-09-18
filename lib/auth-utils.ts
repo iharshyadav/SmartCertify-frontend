@@ -1,51 +1,53 @@
 import { User } from "./auth-types"
+import { clientCookies } from "./cookie-utils"
 
 const TOKEN_KEY = "certify_token"
 const REFRESH_TOKEN_KEY = "certify_refresh_token"
 const USER_KEY = "certify_user"
-
 export const tokenManager = {
   getToken: (): string | null => {
-    if (typeof window === "undefined") return null
-    return localStorage.getItem(TOKEN_KEY)
+    return clientCookies.get(TOKEN_KEY)
   },
 
   setToken: (token: string): void => {
-    if (typeof window === "undefined") return
-    localStorage.setItem(TOKEN_KEY, token)
+    // Set token to expire in 1 day (24 hours)
+    clientCookies.set(TOKEN_KEY, token, {
+      maxAge: 24 * 60 * 60, // 24 hours in seconds
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    })
   },
 
   removeToken: (): void => {
-    if (typeof window === "undefined") return
-    localStorage.removeItem(TOKEN_KEY)
+    clientCookies.remove(TOKEN_KEY)
   },
 
   getRefreshToken: (): string | null => {
-    if (typeof window === "undefined") return null
-    return localStorage.getItem(REFRESH_TOKEN_KEY)
+    return clientCookies.get(REFRESH_TOKEN_KEY)
   },
 
   setRefreshToken: (refreshToken: string): void => {
-    if (typeof window === "undefined") return
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken)
+    // Set refresh token to expire in 7 days
+    clientCookies.set(REFRESH_TOKEN_KEY, refreshToken, {
+      maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    })
   },
 
   removeRefreshToken: (): void => {
-    if (typeof window === "undefined") return
-    localStorage.removeItem(REFRESH_TOKEN_KEY)
+    clientCookies.remove(REFRESH_TOKEN_KEY)
   },
 
   clearTokens: (): void => {
-    if (typeof window === "undefined") return
-    localStorage.removeItem(TOKEN_KEY)
-    localStorage.removeItem(REFRESH_TOKEN_KEY)
+    clientCookies.remove(TOKEN_KEY)
+    clientCookies.remove(REFRESH_TOKEN_KEY)
   }
 }
 
 export const userManager = {
   getUser: (): User | null => {
-    if (typeof window === "undefined") return null
-    const userString = localStorage.getItem(USER_KEY)
+    const userString = clientCookies.get(USER_KEY)
     if (!userString) return null
     
     try {
@@ -56,13 +58,16 @@ export const userManager = {
   },
 
   setUser: (user: User): void => {
-    if (typeof window === "undefined") return
-    localStorage.setItem(USER_KEY, JSON.stringify(user))
+    // Set user data to expire in 7 days
+    clientCookies.set(USER_KEY, JSON.stringify(user), {
+      maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    })
   },
 
   removeUser: (): void => {
-    if (typeof window === "undefined") return
-    localStorage.removeItem(USER_KEY)
+    clientCookies.remove(USER_KEY)
   }
 }
 
@@ -71,12 +76,23 @@ export const jwtUtils = {
     try {
       const base64Url = token.split('.')[1]
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-      const jsonPayload = decodeURIComponent(
-        window.atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-        }).join('')
-      )
-      return JSON.parse(jsonPayload)
+      
+      // Use Buffer for server-side or atob for client-side
+      let decoded: string
+      if (typeof window === "undefined") {
+        // Server-side (Node.js)
+        decoded = Buffer.from(base64, 'base64').toString('utf-8')
+      } else {
+        // Client-side (browser)
+        const jsonPayload = decodeURIComponent(
+          window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+          }).join('')
+        )
+        decoded = jsonPayload
+      }
+      
+      return JSON.parse(decoded)
     } catch {
       return null
     }

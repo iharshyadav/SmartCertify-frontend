@@ -37,9 +37,9 @@ class ApiClient {
     const config: RequestInit = {
       headers: {
         "Content-Type": "application/json",
-        ...apiHelpers.getAuthHeader(),
         ...options.headers
       },
+      credentials: 'include', // Include cookies in all requests
       ...options
     }
 

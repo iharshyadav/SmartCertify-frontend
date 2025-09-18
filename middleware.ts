@@ -26,7 +26,11 @@ export function middleware(request: NextRequest) {
   
   const token = request.cookies.get('certify_token')?.value
   
-  const isAuthenticated = !!token
+  const isAuthenticated = !!token;
+
+  if (publicRoutes.some(route => pathname === route)) {
+    return NextResponse.next()
+  }
   
   if (protectedRoutes.some(route => pathname.startsWith(route)) && !isAuthenticated) {
     const signinUrl = new URL('/signin', request.url)
@@ -35,8 +39,7 @@ export function middleware(request: NextRequest) {
   }
   
   if (authRoutes.some(route => pathname.startsWith(route)) && isAuthenticated) {
-    const dashboardUrl = new URL('/dashboard', request.url)
-    return NextResponse.redirect(new URL('/', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
   
   if (pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/')) {

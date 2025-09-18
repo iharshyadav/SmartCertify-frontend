@@ -83,7 +83,7 @@ export default function SignupPage() {
       
       await signup(data)
       
-      router.push("/")
+      router.push("/dashboard")
     } catch (error) {
       console.error("Signup error:", error)
       

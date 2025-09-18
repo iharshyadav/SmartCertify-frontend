@@ -57,7 +57,7 @@ export default function SigninPage() {
       
       await signin(data)
       
-      router.push("/")
+      router.push("/dashboard")
     } catch (error) {
       console.error("Signin error:", error)
       
