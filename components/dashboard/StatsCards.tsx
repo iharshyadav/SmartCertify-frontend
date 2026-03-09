@@ -11,6 +11,7 @@ import {
   AlertTriangle,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { DashboardStats } from "@/lib/certificate-api"
 
 interface StatsCardProps {
   title: string
@@ -59,11 +60,11 @@ function StatsCard({ title, value, change, icon: Icon, iconColor, iconBg }: Stat
   )
 }
 
-export default function StatsCards() {
+export default function StatsCards({ statsData }: { statsData?: DashboardStats | null }) {
   const stats = [
     {
       title: "Total Certificates",
-      value: "2,847",
+      value: statsData?.totalCertificates || "0",
       change: {
         value: "+12.5%",
         type: "increase" as const,
@@ -75,7 +76,7 @@ export default function StatsCards() {
     },
     {
       title: "Active Students",
-      value: "1,234",
+      value: statsData?.activeStudents || "0",
       change: {
         value: "+8.2%",
         type: "increase" as const,
@@ -87,7 +88,7 @@ export default function StatsCards() {
     },
     {
       title: "Verified Today",
-      value: "156",
+      value: statsData?.verifiedToday || "0",
       change: {
         value: "+23.1%",
         type: "increase" as const,
@@ -99,7 +100,7 @@ export default function StatsCards() {
     },
     {
       title: "Success Rate",
-      value: "98.7%",
+      value: `${statsData?.successRate || 0}%`,
       change: {
         value: "+0.3%",
         type: "increase" as const,
@@ -114,14 +115,14 @@ export default function StatsCards() {
   const alertStats = [
     {
       title: "Pending Reviews",
-      value: "12",
+      value: statsData?.pendingReviews || "0",
       icon: Clock,
       iconColor: "text-orange-600",
       iconBg: "bg-orange-100"
     },
     {
       title: "Failed Verifications",
-      value: "3",
+      value: statsData?.failedVerifications || "0",
       icon: AlertTriangle,
       iconColor: "text-red-600",
       iconBg: "bg-red-100"

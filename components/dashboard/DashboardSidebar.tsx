@@ -21,6 +21,7 @@ import {
   ChevronRight,
   Home,
   Database,
+  Brain,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -35,61 +36,18 @@ const navigationItems = [
     description: "Dashboard overview and stats"
   },
   {
-    title: "Certificates",
-    href: "/dashboard/certificates",
-    icon: Award,
-    badge: "124",
-    description: "Manage all certificates"
-  },
-  {
-    title: "Upload",
-    href: "/dashboard/upload",
-    icon: Upload,
-    description: "Upload new certificates"
-  },
-  {
-    title: "Verify",
-    href: "/dashboard/verify",
-    icon: Shield,
-    description: "Verify certificates"
-  },
-  {
-    title: "Analytics",
-    href: "/dashboard/analytics",
-    icon: BarChart3,
-    description: "View detailed analytics"
-  },
-  {
-    title: "Students",
-    href: "/dashboard/students",
-    icon: Users,
-    badge: "1.2k",
-    description: "Manage students"
-  },
-  {
-    title: "Reports",
-    href: "/dashboard/reports",
-    icon: FileText,
-    description: "Generate reports"
-  },
-  {
-    title: "Search",
-    href: "/dashboard/search",
-    icon: Search,
-    description: "Search certificates"
+    title: "AI Verify",
+    href: "/dashboard/ai-verify",
+    icon: Brain,
+    badge: "NEW",
+    description: "AI-powered fraud detection & analysis"
   }
 ]
 
 const bottomItems = [
   {
-    title: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-    description: "Account settings"
-  },
-  {
     title: "Help",
-    href: "/dashboard/help",
+    href: "mailto:support@smartcertify.com",
     icon: HelpCircle,
     description: "Get help and support"
   }
@@ -101,7 +59,7 @@ export default function DashboardSidebar({ className }: SidebarProps) {
 
   return (
     <div className={cn(
-      "flex flex-col bg-white border-r border-gray-200 transition-all duration-300",
+      "hidden md:flex flex-col bg-white border-r border-gray-200 transition-all duration-300",
       isCollapsed ? "w-16" : "w-64",
       className
     )}>
@@ -162,7 +120,7 @@ export default function DashboardSidebar({ className }: SidebarProps) {
                     )}
                   </>
                 )}
-                
+
                 {/* Tooltip for collapsed state */}
                 {isCollapsed && (
                   <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
@@ -224,7 +182,7 @@ export default function DashboardSidebar({ className }: SidebarProps) {
                 {!isCollapsed && (
                   <span className="flex-1">{item.title}</span>
                 )}
-                
+
                 {/* Tooltip for collapsed state */}
                 {isCollapsed && (
                   <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">

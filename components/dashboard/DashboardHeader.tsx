@@ -20,6 +20,11 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar"
 import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import {
   Search,
   Bell,
   User,
@@ -29,7 +34,11 @@ import {
   Zap,
   Award,
   Command,
+  Menu,
 } from "lucide-react"
+
+// We simulate importing the Sidebar component to embed inside the Sheet
+import DashboardSidebar from "./DashboardSidebar"
 
 interface DashboardHeaderProps {
   title?: string
@@ -55,16 +64,31 @@ export default function DashboardHeader({ title, description }: DashboardHeaderP
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-200">
       <div className="flex items-center justify-between px-6 py-4">
         {/* Left side - Title and breadcrumb */}
-        <div className="flex-1">
+        <div className="flex-1 flex items-center space-x-2">
+          {/* Mobile Menu Trigger */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="-ml-2">
+                  <Menu className="w-5 h-5 text-gray-700" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-64 border-r-0">
+                {/* Embed Sidebar without background so Sheet handles it */}
+                <DashboardSidebar className="border-r-0 h-full w-full" />
+              </SheetContent>
+            </Sheet>
+          </div>
+
           {title ? (
-            <div>
+            <div className="hidden sm:block">
               <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
               {description && (
-                <p className="text-sm text-gray-600 mt-1">{description}</p>
+                <p className="text-sm text-gray-600 mt-1 truncate">{description}</p>
               )}
             </div>
           ) : (
-            <div className="flex items-center space-x-2">
+            <div className="hidden sm:flex items-center space-x-2">
               <Command className="w-5 h-5 text-gray-400" />
               <span className="text-sm text-gray-500">
                 Press <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">⌘K</kbd> to search

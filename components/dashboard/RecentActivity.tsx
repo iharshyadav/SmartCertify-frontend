@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Award,
   Upload,
@@ -15,6 +14,7 @@ import {
   Eye,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Certificate } from "@/lib/certificate-api"
 
 interface ActivityItem {
   id: string
@@ -113,7 +113,7 @@ const activities: ActivityItem[] = [
 
 function getActivityIcon(type: ActivityItem["type"], status: ActivityItem["status"]) {
   const baseClass = "w-4 h-4"
-  
+
   switch (type) {
     case "upload":
       return <Upload className={cn(baseClass, "text-blue-600")} />
@@ -145,7 +145,28 @@ function getStatusBadge(status: ActivityItem["status"]) {
   }
 }
 
-export default function RecentActivity() {
+export default function RecentActivity({ certificates = [] }: { certificates?: Certificate[] }) {
+  // Map certificates to activity items for display
+  const displayActivities = certificates.length > 0 ? certificates.slice(0, 5).map(cert => ({
+    id: cert.id,
+    type: "upload" as const,
+    title: "Certificate Uploaded",
+    description: cert.name,
+    timestamp: new Date(cert.createdAt).toLocaleDateString(),
+    status: "success" as const,
+    certificateId: cert.id.substring(0, 8)
+  })) : [
+    {
+      id: "empty-1",
+      type: "view" as const,
+      title: "No recent activity",
+      description: "Upload a certificate to get started",
+      timestamp: "",
+      status: "info" as const,
+      certificateId: ""
+    }
+  ]
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-4">
@@ -159,17 +180,14 @@ export default function RecentActivity() {
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
-        {activities.map((activity, index) => (
+        {displayActivities.map((activity, index) => (
           <div key={activity.id} className="flex items-start space-x-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
             <div className="flex-shrink-0">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={activity.user.avatar} />
-                <AvatarFallback className="text-xs font-medium bg-gradient-to-r from-blue-500 to-purple-500 text-white">
-                  {activity.user.initials}
-                </AvatarFallback>
-              </Avatar>
+              <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-xs font-medium text-white">
+                {activity.type === "upload" ? "C" : "I"}
+              </div>
             </div>
-            
+
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2 mb-1">
                 {getActivityIcon(activity.type, activity.status)}
@@ -178,14 +196,13 @@ export default function RecentActivity() {
                 </p>
                 {getStatusBadge(activity.status)}
               </div>
-              
+
               <p className="text-sm text-gray-600 mb-1">{activity.description}</p>
-              
+
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>{activity.user.name}</span>
                 <span>{activity.timestamp}</span>
               </div>
-              
+
               {activity.certificateId && (
                 <div className="mt-2">
                   <Badge variant="outline" className="text-xs font-mono">
@@ -196,7 +213,7 @@ export default function RecentActivity() {
             </div>
           </div>
         ))}
-        
+
         <div className="pt-4 border-t border-gray-100">
           <Button variant="outline" className="w-full text-sm">
             <Clock className="w-4 h-4 mr-2" />

@@ -1,10 +1,16 @@
 "use client"
 
+import Link from "next/link"
+
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar"
 import DashboardHeader from "@/components/dashboard/DashboardHeader"
 import StatsCards from "@/components/dashboard/StatsCards"
 import RecentActivity from "@/components/dashboard/RecentActivity"
+import UploadCertificateModal from "@/components/dashboard/UploadCertificateModal"
+import { useEffect, useState } from "react"
+import { authApi } from "@/lib/auth-api"
+import { certificateApi, DashboardStats, Certificate } from "@/lib/certificate-api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -24,48 +30,71 @@ import {
 } from "lucide-react"
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [certificates, setCertificates] = useState<Certificate[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchDashboardData = async () => {
+    try {
+      const [statsRes, certsRes] = await Promise.all([
+        certificateApi.getDashboardStats(),
+        certificateApi.getCertificates()
+      ])
+      if (statsRes.success) setStats(statsRes.data)
+      if (certsRes.success) setCertificates(certsRes.data)
+    } catch (error) {
+      console.error("Failed to load dashboard data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 flex">
         <DashboardSidebar />
-        
+
         <div className="flex-1 flex flex-col min-w-0">
-          <DashboardHeader 
-            title="Dashboard Overview" 
+          <DashboardHeader
+            title="Dashboard Overview"
             description="Welcome back! Here's what's happening with your certificates."
           />
-          
+
           <main className="flex-1 p-6 space-y-6 overflow-auto">
             {/* Stats Cards */}
-            <StatsCards />
-            
+            {loading ? (
+              <div className="h-40 flex items-center justify-center bg-gray-100 rounded-lg animate-pulse">Loading stats...</div>
+            ) : (
+              <StatsCards statsData={stats} />
+            )}
+
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Button className="h-16 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
-                <Upload className="w-5 h-5 mr-2" />
-                Upload Certificate
-              </Button>
-              <Button variant="outline" className="h-16">
-                <Shield className="w-5 h-5 mr-2" />
-                Verify Certificate
-              </Button>
-              <Button variant="outline" className="h-16">
-                <BarChart3 className="w-5 h-5 mr-2" />
-                View Analytics
-              </Button>
-              <Button variant="outline" className="h-16">
-                <FileText className="w-5 h-5 mr-2" />
-                Generate Report
-              </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <UploadCertificateModal onSuccess={fetchDashboardData}>
+                <Button className="h-16 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white w-full">
+                  <Upload className="w-5 h-5 mr-2" />
+                  Upload Certificate
+                </Button>
+              </UploadCertificateModal>
+              <Link href="/dashboard/ai-verify" className="w-full">
+                <Button variant="outline" className="h-16 w-full">
+                  <Shield className="w-5 h-5 mr-2" />
+                  Verify Certificate
+                </Button>
+              </Link>
             </div>
-            
+
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Activity */}
               <div className="lg:col-span-2">
-                <RecentActivity />
+                <RecentActivity certificates={certificates} />
               </div>
-              
+
               {/* Side Panel */}
               <div className="space-y-6">
                 {/* Quick Stats */}
@@ -77,15 +106,15 @@ export default function DashboardPage() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Certificates Processed</span>
-                      <Badge variant="secondary">156</Badge>
+                      <Badge variant="secondary">{stats?.totalCertificates || 0}</Badge>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Success Rate</span>
-                      <Badge className="bg-green-100 text-green-800">98.7%</Badge>
+                      <Badge className="bg-green-100 text-green-800">{stats?.successRate || 0}%</Badge>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Pending Reviews</span>
-                      <Badge variant="outline">12</Badge>
+                      <Badge variant="outline">{stats?.pendingReviews || 0}</Badge>
                     </div>
                     <div className="pt-4 border-t">
                       <div className="flex items-center justify-between mb-2">
@@ -96,7 +125,7 @@ export default function DashboardPage() {
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 {/* Recent Certificates */}
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between pb-4">
@@ -109,55 +138,36 @@ export default function DashboardPage() {
                     </Button>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {[
-                      {
-                        id: "CRT-2024-001",
-                        title: "Computer Science Degree",
-                        student: "John Doe",
-                        status: "verified",
-                        date: "2 hours ago"
-                      },
-                      {
-                        id: "CRT-2024-002",
-                        title: "MBA Certificate",
-                        student: "Sarah Wilson",
-                        status: "pending",
-                        date: "4 hours ago"
-                      },
-                      {
-                        id: "CRT-2024-003",
-                        title: "PhD in Data Science",
-                        student: "Michael Chen",
-                        status: "verified",
-                        date: "1 day ago"
-                      }
-                    ].map((cert, index) => (
-                      <div key={cert.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Award className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{cert.title}</p>
-                          <p className="text-xs text-gray-600">{cert.student}</p>
-                          <div className="flex items-center justify-between mt-1">
-                            <Badge 
-                              variant={cert.status === 'verified' ? 'default' : 'secondary'}
-                              className={cert.status === 'verified' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}
-                            >
-                              {cert.status}
-                            </Badge>
-                            <span className="text-xs text-gray-500">{cert.date}</span>
+                    {certificates.length === 0 ? (
+                      <div className="text-sm text-gray-500 text-center py-4">No certificates uploaded yet</div>
+                    ) : (
+                      certificates.slice(0, 3).map((cert) => (
+                        <div key={cert.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Award className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 truncate">{cert.name}</p>
+                            <p className="text-xs text-gray-600">ID: {cert.id.substring(0, 8)}</p>
+                            <div className="flex items-center justify-between mt-1">
+                              <Badge
+                                variant={'default'}
+                                className={'bg-green-100 text-green-800'}
+                              >
+                                Uploaded
+                              </Badge>
+                              <span className="text-xs text-gray-500">{new Date(cert.createdAt).toLocaleDateString()}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      )))}
                     <Button variant="outline" className="w-full text-sm">
                       View All Certificates
                       <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
                   </CardContent>
                 </Card>
-                
+
                 {/* System Status */}
                 <Card>
                   <CardHeader>
@@ -196,7 +206,7 @@ export default function DashboardPage() {
                 </Card>
               </div>
             </div>
-            
+
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
@@ -213,7 +223,7 @@ export default function DashboardPage() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Verification Success Rate</CardTitle>

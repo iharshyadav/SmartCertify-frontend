@@ -1,15 +1,15 @@
-import { 
-  SigninFormData, 
-  SignupFormData, 
-  GoogleAuthData, 
-  AuthResponse, 
-  ApiError 
+import {
+  SigninFormData,
+  SignupFormData,
+  GoogleAuthData,
+  AuthResponse,
+  ApiError
 } from "./auth-types"
 import { apiHelpers } from "./auth-utils"
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/users` || "http://localhost:8000/api/users"
 
-class ApiResponseError extends Error {
+export class ApiResponseError extends Error {
   status: number
   errors?: Array<{ field?: string, message?: string, msg?: string }>
 
@@ -21,7 +21,7 @@ class ApiResponseError extends Error {
   }
 }
 
-class ApiClient {
+export class ApiClient {
   private baseUrl: string
 
   constructor(baseUrl: string) {
@@ -29,11 +29,11 @@ class ApiClient {
   }
 
   private async request<T>(
-    endpoint: string, 
+    endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`
-    
+
     const config: RequestInit = {
       headers: {
         "Content-Type": "application/json",
@@ -60,7 +60,7 @@ class ApiClient {
       if (error instanceof ApiResponseError) {
         throw error
       }
-      
+
       throw new ApiResponseError(
         "Network error occurred",
         0
@@ -201,10 +201,10 @@ export const getErrorMessage = (error: any): string => {
   if (isApiError(error)) {
     return error.message
   }
-  
+
   if (error instanceof Error) {
     return error.message
   }
-  
+
   return "An unexpected error occurred"
 }
