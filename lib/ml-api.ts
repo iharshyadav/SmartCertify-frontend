@@ -1,12 +1,17 @@
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/ml` || "http://localhost:8000/api/ml"
+const ML_BASE_URL = process.env.NEXT_PUBLIC_ML_API_URL
+    ? `${process.env.NEXT_PUBLIC_ML_API_URL}/api/ml`
+    : "http://localhost:7860/api/ml"
 
 async function mlRequest<T>(endpoint: string, data?: any): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`
+    const url = `${ML_BASE_URL}${endpoint}`
 
     const config: RequestInit = {
         method: data ? "POST" : "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": process.env.NEXT_PUBLIC_ML_API_KEY ?? "smartcertify-dev-key",
+        },
+        // Don't use credentials:"include" for cross-origin HF Spaces (causes CORS preflight issues)
         ...(data && { body: JSON.stringify(data) }),
     }
 
@@ -14,10 +19,11 @@ async function mlRequest<T>(endpoint: string, data?: any): Promise<T> {
     const result = await response.json()
 
     if (!response.ok) {
-        throw new Error(result.message || `ML request failed: ${response.status}`)
+        throw new Error(result.detail || result.message || `ML request failed: ${response.status}`)
     }
 
-    return result.data
+    // FastAPI returns data directly — NOT wrapped in { data: ... }
+    return result as T
 }
 
 // ─── Types ───────────────────────────────────────────────────
