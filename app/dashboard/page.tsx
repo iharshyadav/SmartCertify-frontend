@@ -1,15 +1,13 @@
 "use client"
 
 import Link from "next/link"
-
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar"
 import DashboardHeader from "@/components/dashboard/DashboardHeader"
-import StatsCards from "@/components/dashboard/StatsCards"
+import { StatsCards } from "@/components/dashboard/StatsCards"
 import RecentActivity from "@/components/dashboard/RecentActivity"
 import UploadCertificateModal from "@/components/dashboard/UploadCertificateModal"
 import { useEffect, useState } from "react"
-import { authApi } from "@/lib/auth-api"
 import { certificateApi, DashboardStats, Certificate } from "@/lib/certificate-api"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,15 +16,14 @@ import { Progress } from "@/components/ui/progress"
 import {
   Upload,
   Shield,
-  BarChart3,
-  Users,
-  TrendingUp,
-  Calendar,
-  FileText,
   Award,
   ArrowRight,
   Plus,
   Download,
+  CheckCircle2,
+  Clock,
+  Cpu,
+  Link2,
 } from "lucide-react"
 
 export default function DashboardPage() {
@@ -55,19 +52,24 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-slate-50 flex">
         <DashboardSidebar />
-
         <div className="flex-1 flex flex-col min-w-0">
           <DashboardHeader
-            title="Dashboard Overview"
+            title="Dashboard"
             description="Welcome back! Here's what's happening with your certificates."
           />
+          <main className="flex-1 p-6 lg:p-8 space-y-6 overflow-auto">
 
-          <main className="flex-1 p-6 space-y-6 overflow-auto">
-            {/* Stats Cards */}
+            {/* Stats Cards + Charts */}
             {loading ? (
-              <div className="h-40 flex items-center justify-center bg-gray-100 rounded-lg animate-pulse">Loading stats...</div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-28 bg-white rounded-2xl border border-slate-200/80 animate-pulse" />
+                  ))}
+                </div>
+              </div>
             ) : (
               <StatsCards statsData={stats} />
             )}
@@ -75,131 +77,131 @@ export default function DashboardPage() {
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <UploadCertificateModal onSuccess={fetchDashboardData}>
-                <Button className="h-16 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white w-full">
-                  <Upload className="w-5 h-5 mr-2" />
+                <Button className="h-14 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white w-full shadow-md hover:shadow-blue-200 text-sm font-semibold transition-all duration-200 active:scale-[0.99]">
+                  <Upload className="w-4 h-4 mr-2.5" />
                   Upload Certificate
                 </Button>
               </UploadCertificateModal>
               <Link href="/dashboard/ai-verify" className="w-full">
-                <Button variant="outline" className="h-16 w-full">
-                  <Shield className="w-5 h-5 mr-2" />
-                  Verify Certificate
+                <Button variant="outline" className="h-14 rounded-xl w-full border-slate-200 bg-white hover:bg-slate-50 hover:border-blue-300 shadow-sm text-sm font-semibold transition-all duration-200 active:scale-[0.99] text-slate-700">
+                  <Shield className="w-4 h-4 mr-2.5 text-indigo-500" />
+                  AI Verify Certificate
                 </Button>
               </Link>
             </div>
 
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Recent Activity */}
-              <div className="lg:col-span-2">
-                <RecentActivity certificates={certificates} />
+            {/* Main Content: Activity + Side Panel */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              {/* Recent Activity — 2 col span */}
+              <div className="xl:col-span-2">
+                <RecentActivity />
               </div>
 
               {/* Side Panel */}
-              <div className="space-y-6">
-                {/* Quick Stats */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Today's Summary</CardTitle>
-                    <CardDescription>Key metrics for today</CardDescription>
+              <div className="space-y-4">
+                {/* Summary */}
+                <Card className="border border-slate-200/80 shadow-sm bg-white">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold text-slate-800">Today's Summary</CardTitle>
+                    <CardDescription className="text-xs text-slate-400">Key metrics for today</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Certificates Processed</span>
-                      <Badge variant="secondary">{stats?.totalCertificates || 0}</Badge>
+                      <span className="text-sm text-slate-500">Processed</span>
+                      <Badge variant="secondary" className="bg-slate-100 text-slate-700 text-xs font-semibold">{stats?.totalCertificates || 0}</Badge>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Success Rate</span>
-                      <Badge className="bg-green-100 text-green-800">{stats?.successRate || 0}%</Badge>
+                      <span className="text-sm text-slate-500">Success Rate</span>
+                      <Badge className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold hover:bg-emerald-50">{stats?.successRate || 0}%</Badge>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Pending Reviews</span>
-                      <Badge variant="outline">{stats?.pendingReviews || 0}</Badge>
+                      <span className="text-sm text-slate-500">Pending</span>
+                      <Badge variant="outline" className="border-amber-200 text-amber-700 text-xs font-semibold">{stats?.pendingReviews || 0}</Badge>
                     </div>
-                    <div className="pt-4 border-t">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-600">Processing Queue</span>
-                        <span className="text-sm font-medium">78%</span>
+                    <div className="pt-3 border-t border-slate-100">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs text-slate-500">Certificates Stored</span>
+                        <span className="text-xs font-semibold text-slate-700">{stats?.totalCertificates || 0} / ∞</span>
                       </div>
-                      <Progress value={78} className="h-2" />
+                      <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-700"
+                          style={{ width: `${Math.min(100, ((stats?.totalCertificates || 0) / 100) * 100)}%` }} />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Recent Certificates */}
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <Card className="border border-slate-200/80 shadow-sm bg-white">
+                  <CardHeader className="pb-3 flex flex-row items-center justify-between">
                     <div>
-                      <CardTitle className="text-lg">Recent Certificates</CardTitle>
-                      <CardDescription>Latest uploaded certificates</CardDescription>
+                      <CardTitle className="text-sm font-semibold text-slate-800">Recent Certificates</CardTitle>
+                      <CardDescription className="text-xs text-slate-400">Latest uploads</CardDescription>
                     </div>
-                    <Button variant="ghost" size="sm">
-                      <Plus className="w-4 h-4" />
+                    <Button variant="ghost" size="sm" className="h-7 w-7 p-0 hover:bg-slate-100">
+                      <Plus className="w-4 h-4 text-slate-400" />
                     </Button>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-2.5">
                     {certificates.length === 0 ? (
-                      <div className="text-sm text-gray-500 text-center py-4">No certificates uploaded yet</div>
+                      <div className="text-xs text-slate-400 text-center py-6 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                        No certificates yet
+                      </div>
                     ) : (
-                      certificates.slice(0, 3).map((cert) => (
-                        <div key={cert.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <Award className="w-5 h-5 text-white" />
+                      certificates.slice(0, 4).map((cert) => (
+                        <div key={cert.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors duration-150 border border-transparent hover:border-slate-200">
+                          <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 border border-blue-100">
+                            <Award className="w-4 h-4 text-blue-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{cert.name}</p>
-                            <p className="text-xs text-gray-600">ID: {cert.id.substring(0, 8)}</p>
-                            <div className="flex items-center justify-between mt-1">
-                              <Badge
-                                variant={'default'}
-                                className={'bg-green-100 text-green-800'}
-                              >
-                                Uploaded
-                              </Badge>
-                              <span className="text-xs text-gray-500">{new Date(cert.createdAt).toLocaleDateString()}</span>
-                            </div>
+                            <p className="text-xs font-semibold text-slate-700 truncate">{cert.name}</p>
+                            <p className="text-[10px] text-slate-400 font-mono">#{cert.id.substring(0, 8)}</p>
                           </div>
+                          <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-50 text-[10px] font-semibold border flex-shrink-0">
+                            <CheckCircle2 className="w-2.5 h-2.5 mr-1" />
+                            Done
+                          </Badge>
                         </div>
-                      )))}
-                    <Button variant="outline" className="w-full text-sm">
-                      View All Certificates
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
+                      ))
+                    )}
+                    <Link href="/dashboard/history">
+                      <Button variant="ghost" className="w-full text-xs h-8 text-slate-500 hover:text-blue-600 hover:bg-blue-50 mt-1">
+                        View All History
+                        <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
 
                 {/* System Status */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">System Status</CardTitle>
-                    <CardDescription>All systems operational</CardDescription>
+                <Card className="border border-slate-200/80 shadow-sm bg-white">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-semibold text-slate-800">System Status</CardTitle>
+                    <CardDescription className="text-xs text-slate-400">All systems operational</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">AI Processing</span>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-green-600">Online</span>
+                  <CardContent className="space-y-3">
+                    {[
+                      { label: "AI Processing", status: "Online", icon: Cpu, color: "text-emerald-600", dot: "bg-emerald-500", bg: "bg-emerald-50" },
+                      { label: "Blockchain Network", status: "Connected", icon: Link2, color: "text-emerald-600", dot: "bg-emerald-500", bg: "bg-emerald-50" },
+                      { label: "Queue Processing", status: "75% Used", icon: Clock, color: "text-amber-600", dot: "bg-amber-500", bg: "bg-amber-50" },
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-7 h-7 rounded-md flex items-center justify-center ${item.bg}`}>
+                            <item.icon className={`w-3.5 h-3.5 ${item.color}`} />
+                          </div>
+                          <span className="text-xs text-slate-600">{item.label}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <div className={`w-1.5 h-1.5 rounded-full ${item.dot} ${item.dot === "bg-emerald-500" ? "animate-pulse" : ""}`} />
+                          <span className={`text-xs font-semibold ${item.color}`}>{item.status}</span>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Blockchain Network</span>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-green-600">Connected</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Storage</span>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span className="text-sm text-yellow-600">75% Used</span>
-                      </div>
-                    </div>
-                    <div className="pt-4 border-t">
-                      <Button variant="outline" className="w-full text-sm">
-                        <Download className="w-4 h-4 mr-2" />
-                        Export System Logs
+                    ))}
+                    <div className="pt-2 border-t border-slate-100">
+                      <Button variant="outline" className="w-full text-xs h-8 border-slate-200 text-slate-600 hover:bg-slate-50">
+                        <Download className="w-3.5 h-3.5 mr-1.5" />
+                        Export Logs
                       </Button>
                     </div>
                   </CardContent>
@@ -207,38 +209,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Certificate Trends</CardTitle>
-                  <CardDescription>Monthly certificate processing overview</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-                    <div className="text-center">
-                      <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500">Chart visualization would go here</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Verification Success Rate</CardTitle>
-                  <CardDescription>Success rate trends over time</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-                    <div className="text-center">
-                      <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-gray-500">Chart visualization would go here</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </main>
         </div>
       </div>

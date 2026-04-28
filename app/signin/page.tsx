@@ -5,8 +5,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import { GoogleLogin } from "@react-oauth/google"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -17,20 +16,27 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
-  Sparkles,
   Lock,
   Mail,
-  Star,
   Brain,
   Zap,
   Users,
   AlertCircle,
   Loader2,
+  CheckCircle,
+  ChevronRight,
 } from "lucide-react"
 import Link from "next/link"
 import { useAuthForm } from "@/lib/auth-context"
 import { signinSchema, SigninFormData } from "@/lib/auth-types"
 import { isApiError } from "@/lib/auth-api"
+
+const features = [
+  { icon: Brain, label: "AI-Powered OCR", desc: "Extract certificate data automatically", color: "text-blue-600", bg: "bg-blue-50" },
+  { icon: Shield, label: "Blockchain Security", desc: "Tamper-proof verification system", color: "text-indigo-600", bg: "bg-indigo-50" },
+  { icon: Zap, label: "Instant Processing", desc: "Real-time certificate verification", color: "text-violet-600", bg: "bg-violet-50" },
+  { icon: Users, label: "Multi-User Dashboard", desc: "Manage teams and permissions", color: "text-emerald-600", bg: "bg-emerald-50" },
+]
 
 export default function SigninPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -39,39 +45,21 @@ export default function SigninPage() {
   const router = useRouter()
   const { signin, googleAuth, isLoading } = useAuthForm()
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    setError: setFormError,
-    clearErrors
-  } = useForm<SigninFormData>({
+  const { register, handleSubmit, formState: { errors }, setError: setFormError, clearErrors } = useForm<SigninFormData>({
     resolver: zodResolver(signinSchema)
   })
-
-  const togglePasswordVisibility = () => setShowPassword(!showPassword)
 
   const onSubmit = async (data: SigninFormData) => {
     try {
       setError(null)
       clearErrors()
-
       await signin(data)
-
       router.push("/dashboard")
     } catch (error) {
-      console.error("Signin error:", error)
-
       if (isApiError(error)) {
-        // Handle validation errors
         if (error.errors && error.errors.length > 0) {
           error.errors.forEach(err => {
-            if (err.field) {
-              setFormError(err.field as keyof SigninFormData, {
-                type: "server",
-                message: err.message
-              })
-            }
+            if (err.field) setFormError(err.field as keyof SigninFormData, { type: "server", message: err.message })
           })
         } else {
           setError(error.message)
@@ -83,304 +71,165 @@ export default function SigninPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      <nav className="border-b border-white/10 bg-white/70 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 rounded-xl flex items-center justify-center shadow-lg">
-                <Award className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
-                  SmartCertify
-                </span>
-                <div className="text-xs text-gray-500 font-medium">AI-Powered Verification</div>
-              </div>
-            </Link>
-
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-600">Don't have an account?</span>
-              <Link href="/signup">
-                <Button variant="outline" size="sm">
-                  Sign Up
-                </Button>
-              </Link>
-            </div>
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Navbar */}
+      <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+            <Award className="w-4 h-4 text-white" />
           </div>
+          <span className="text-base font-bold text-slate-800 tracking-tight">SmartCertify</span>
+        </Link>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-slate-500">Don't have an account?</span>
+          <Link href="/signup">
+            <Button variant="outline" size="sm" className="border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold h-8 px-4">
+              Sign Up
+            </Button>
+          </Link>
         </div>
       </nav>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-12 min-h-[calc(100vh-120px)]">
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <Badge variant="secondary" className="px-4 py-2 text-sm font-medium w-fit">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Welcome Back to SmartCertify
-              </Badge>
-
-              <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent leading-tight">
-                Sign in to your account
-              </h1>
-
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Access your certificate dashboard and continue managing your digital credentials with
-                enterprise-grade security.
-              </p>
+      <div className="flex-1 grid lg:grid-cols-2">
+        {/* Left — Branding panel */}
+        <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-slate-50 to-blue-50/40 px-12 py-16 border-r border-slate-100">
+          <div>
+            <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-full px-3 py-1.5 mb-8">
+              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
+              <span className="text-xs font-semibold text-blue-700">Enterprise Certificate Platform</span>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-sm">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                  <Brain className="w-5 h-5 text-blue-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-1">AI-Powered OCR</h3>
-                <p className="text-sm text-gray-600">Automatically extract certificate data</p>
-              </div>
-
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-sm">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">
-                  <Shield className="w-5 h-5 text-purple-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-1">Blockchain Security</h3>
-                <p className="text-sm text-gray-600">Tamper-proof verification system</p>
-              </div>
-
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-sm">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
-                  <Zap className="w-5 h-5 text-green-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-1">Instant Processing</h3>
-                <p className="text-sm text-gray-600">Real-time certificate verification</p>
-              </div>
-
-              <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-white/20 shadow-sm">
-                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
-                  <Users className="w-5 h-5 text-orange-600" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-1">Multi-User Dashboard</h3>
-                <p className="text-sm text-gray-600">Manage teams and permissions</p>
-              </div>
-            </div>
-
-            {/* <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <div className="flex -space-x-2">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full border-2 border-white flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">H</span>
-                  </div>
-                  <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-full border-2 border-white flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">M</span>
-                  </div>
-                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full border-2 border-white flex items-center justify-center">
-                    <span className="text-xs font-bold text-white">S</span>
-                  </div>
-                  <div className="w-8 h-8 bg-gray-200 rounded-full border-2 border-white flex items-center justify-center">
-                    <span className="text-xs font-bold text-gray-600">+500</span>
-                  </div>
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">Trusted by leading institutions</p>
-                  <p className="text-sm text-gray-600">Harvard, MIT, Stanford and 500+ more</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">2M+</div>
-                  <div className="text-sm text-gray-600">Certificates Issued</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">99.9%</div>
-                  <div className="text-sm text-gray-600">Uptime</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">500+</div>
-                  <div className="text-sm text-gray-600">Institutions</div>
-                </div>
-              </div>
-            </div> */}
-
-            {/* <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold">JD</span>
-                </div>
-                <div>
-                  <div className="flex items-center space-x-1 mb-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-gray-700 mb-2">
-                    "SmartCertify's secure login system and intuitive dashboard make certificate management
-                    effortless for our entire team."
-                  </p>
-                  <div className="text-sm">
-                    <div className="font-semibold text-gray-900">Dr. Jane Davis</div>
-                    <div className="text-gray-600">Registrar, Stanford University</div>
-                  </div>
-                </div>
-              </div>
-            </div> */}
+            <h1 className="text-4xl font-bold text-slate-900 leading-tight mb-4">
+              Welcome back to<br />
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">SmartCertify</span>
+            </h1>
+            <p className="text-slate-500 text-base leading-relaxed max-w-sm">
+              The world's most trusted AI-powered certificate verification platform. Trusted by 500+ institutions worldwide.
+            </p>
           </div>
 
-          <div className="lg:pl-8">
-            <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm">
-              <CardHeader className="space-y-4 pb-6">
-                <div className="text-center">
-                  <CardTitle className="text-2xl font-bold text-gray-900">Welcome Back</CardTitle>
-                  <CardDescription className="text-gray-600 mt-2">
-                    Sign in to access your certificate dashboard
-                  </CardDescription>
+          {/* Feature tiles */}
+          <div className="grid grid-cols-2 gap-3">
+            {features.map((f, i) => (
+              <div key={i} className="bg-white rounded-2xl p-4 border border-slate-200/60 shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div className={`w-9 h-9 ${f.bg} rounded-xl flex items-center justify-center mb-3 border border-${f.color.split('-')[1]}-100`}>
+                  <f.icon className={`w-4.5 h-4.5 ${f.color}`} />
                 </div>
-              </CardHeader>
+                <p className="text-sm font-semibold text-slate-800 mb-0.5">{f.label}</p>
+                <p className="text-xs text-slate-500">{f.desc}</p>
+              </div>
+            ))}
+          </div>
 
-              <CardContent className="space-y-6">
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 pt-8 border-t border-slate-200/60">
+            {[
+              { value: "2M+", label: "Certificates" },
+              { value: "99.9%", label: "Uptime" },
+              { value: "500+", label: "Institutions" },
+            ].map((s, i) => (
+              <div key={i}>
+                <div className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">{s.value}</div>
+                <div className="text-xs text-slate-400 mt-0.5">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-                <div className="space-y-3 flex justify-center w-full">
-                  <div className="w-full flex justify-center items-center">
-                    <GoogleLogin
-                      onSuccess={async (credentialResponse) => {
-                        try {
-                          setError(null)
-                          if (credentialResponse.credential) {
-                            await googleAuth({ idToken: credentialResponse.credential })
-                            router.push("/dashboard")
-                          }
-                        } catch (error) {
-                          console.error("Google auth error:", error)
-                          setError("Failed to authenticate with Google")
-                        }
-                      }}
-                      onError={() => {
-                        setError("Google authentication failed")
-                      }}
-                      useOneTap
-                      theme="outline"
-                      size="large"
-                      width="100%"
-                    />
-                  </div>
-                </div>
+        {/* Right — Sign in form */}
+        <div className="flex items-center justify-center px-6 py-12 lg:px-16">
+          <div className="w-full max-w-[400px] space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900">Sign in to your account</h2>
+              <p className="text-sm text-slate-500 mt-1.5">Enter your credentials to access your dashboard</p>
+            </div>
 
+            {error && (
+              <Alert variant="destructive" className="border-red-200 bg-red-50 text-red-700">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-sm">{error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Google Auth */}
+            <div className="w-full flex justify-center">
+              <GoogleLogin
+                onSuccess={async (credentialResponse) => {
+                  try {
+                    setError(null)
+                    if (credentialResponse.credential) {
+                      await googleAuth({ idToken: credentialResponse.credential })
+                      router.push("/dashboard")
+                    }
+                  } catch {
+                    setError("Failed to authenticate with Google")
+                  }
+                }}
+                onError={() => setError("Google authentication failed")}
+                useOneTap theme="outline" size="large" width="100%"
+              />
+            </div>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-slate-200" /></div>
+              <div className="relative flex justify-center text-xs"><span className="px-3 bg-white text-slate-400 font-medium">Or continue with email</span></div>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-semibold text-slate-700 uppercase tracking-wide">Email Address</Label>
                 <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-gray-200" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white text-gray-500">Or continue with email</span>
-                  </div>
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <Input
+                    id="email" type="email" placeholder="john@university.edu"
+                    className="h-11 pl-9 border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-400 focus:ring-blue-100 text-sm"
+                    {...register("email")}
+                  />
                 </div>
+                {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email.message}</p>}
+              </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                      Email Address
-                    </Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="john@university.edu"
-                        className="h-11 pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                        {...register("email")}
-                      />
-                    </div>
-                    {errors.email && (
-                      <p className="text-sm text-red-600">{errors.email.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password" className="text-sm font-medium text-gray-700">
-                        Password
-                      </Label>
-                      <Link
-                        href="/forgot-password"
-                        className="text-sm text-blue-600 hover:text-blue-700 hover:underline"
-                      >
-                        Forgot password?
-                      </Link>
-                    </div>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                      <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        className="h-11 pl-10 pr-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                        {...register("password")}
-                      />
-                      <button
-                        type="button"
-                        onClick={togglePasswordVisibility}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                      </button>
-                    </div>
-                    {errors.password && (
-                      <p className="text-sm text-red-600">{errors.password.message}</p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="remember"
-                      checked={rememberMe}
-                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                    />
-                    <Label htmlFor="remember" className="text-sm text-gray-600">
-                      Remember me for 30 days
-                    </Label>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                    ) : (
-                      <ArrowRight className="w-5 h-5 mr-2" />
-                    )}
-                    {isLoading ? "Signing in..." : "Sign In"}
-                  </Button>
-                </form>
-
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <div className="flex items-start space-x-3">
-                    <Shield className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm">
-                      <p className="font-medium text-green-800 mb-1">Secure Sign In</p>
-                      <p className="text-green-700">
-                        Your login is protected with enterprise-grade encryption and multi-factor authentication.
-                      </p>
-                    </div>
-                  </div>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-xs font-semibold text-slate-700 uppercase tracking-wide">Password</Label>
+                  <Link href="/forgot-password" className="text-xs text-blue-600 hover:text-blue-700 font-medium">Forgot password?</Link>
                 </div>
-
-                <div className="text-center pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-600">
-                    Don't have an account?{" "}
-                    <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
-                      Sign up for free
-                    </Link>
-                  </p>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <Input
+                    id="password" type={showPassword ? "text" : "password"} placeholder="••••••••"
+                    className="h-11 pl-9 pr-10 border-slate-200 bg-slate-50 focus:bg-white focus:border-blue-400 focus:ring-blue-100 text-sm"
+                    {...register("password")}
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
-              </CardContent>
-            </Card>
+                {errors.password && <p className="text-xs text-red-600 mt-1">{errors.password.message}</p>}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Checkbox id="remember" checked={rememberMe} onCheckedChange={(c) => setRememberMe(c as boolean)} />
+                <Label htmlFor="remember" className="text-sm text-slate-600 font-normal">Remember me for 30 days</Label>
+              </div>
+
+              <Button type="submit" disabled={isLoading}
+                className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold shadow-md hover:shadow-blue-200 transition-all duration-200">
+                {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ArrowRight className="w-4 h-4 mr-2" />}
+                {isLoading ? "Signing in..." : "Sign In"}
+              </Button>
+            </form>
+
+            {/* Security Badge */}
+            <div className="flex items-start gap-3 p-3.5 bg-emerald-50 border border-emerald-200/60 rounded-xl">
+              <CheckCircle className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-emerald-700"><span className="font-semibold">Secured.</span> Enterprise-grade encryption and multi-factor authentication protect your account.</p>
+            </div>
+
+            <p className="text-center text-sm text-slate-500">
+              Don't have an account?{" "}
+              <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-semibold">Sign up for free</Link>
+            </p>
           </div>
         </div>
       </div>

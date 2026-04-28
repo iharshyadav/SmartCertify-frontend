@@ -38,20 +38,13 @@ export interface AuthError {
 }
 
 export const signinSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Invalid email address"),
-  password: z
-    .string()
-    .min(1, "Password is required")
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  password: z.string().min(1, "Password is required")
 })
 
+// Simplified signup — no institution/student distinction in UI
 export const signupSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email is required")
-    .email("Invalid email address"),
+  email: z.string().min(1, "Email is required").email("Invalid email address"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters long")
@@ -59,32 +52,12 @@ export const signupSchema = z.object({
       /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/,
       "Password must include uppercase, lowercase, number and special character"
     ),
-  username: z
-    .string()
-    .min(3, "Username must be at least 3 characters")
-    .trim(),
-  firstname: z
-    .string()
-    .min(1, "First name is required")
-    .trim(),
-  lastname: z
-    .string()
-    .min(1, "Last name is required")
-    .trim(),
-  usertype: z
-    .enum(["STUDENT", "INSTITUTION"]),
-  institutionname: z
-    .string()
-    .optional()
-})
-.refine((data) => {
-  if (data.usertype === "INSTITUTION") {
-    return data.institutionname && data.institutionname.trim().length > 0
-  }
-  return true
-}, {
-  message: "Institution name is required for institution accounts",
-  path: ["institutionname"]
+  username: z.string().min(3, "Username must be at least 3 characters").trim(),
+  firstname: z.string().min(1, "First name is required").trim(),
+  lastname: z.string().min(1, "Last name is required").trim(),
+  // Always STUDENT — not shown in UI
+  usertype: z.enum(["STUDENT", "INSTITUTION"]),
+  institutionname: z.string().optional()
 })
 
 export const googleAuthSchema = z.object({

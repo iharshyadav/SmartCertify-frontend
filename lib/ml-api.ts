@@ -1,6 +1,10 @@
-const ML_BASE_URL = process.env.NEXT_PUBLIC_ML_API_URL
-    ? `${process.env.NEXT_PUBLIC_ML_API_URL}/api/ml`
-    : "http://localhost:7860/api/ml"
+const APP_API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
+const USE_DIRECT_ML = process.env.NEXT_PUBLIC_USE_DIRECT_ML === "true"
+const ML_BASE_URL = USE_DIRECT_ML
+    ? (process.env.NEXT_PUBLIC_ML_API_URL
+        ? `${process.env.NEXT_PUBLIC_ML_API_URL}/api/ml`
+        : "http://localhost:7860/api/ml")
+    : `${APP_API_BASE}/ml`
 
 async function mlRequest<T>(endpoint: string, data?: any): Promise<T> {
     const url = `${ML_BASE_URL}${endpoint}`
@@ -11,7 +15,8 @@ async function mlRequest<T>(endpoint: string, data?: any): Promise<T> {
             "Content-Type": "application/json",
             "X-API-Key": process.env.NEXT_PUBLIC_ML_API_KEY ?? "smartcertify-dev-key",
         },
-        // Don't use credentials:"include" for cross-origin HF Spaces (causes CORS preflight issues)
+        // Include auth cookies when using backend proxy (/api/ml) so results can be saved per-user in DB.
+        ...(USE_DIRECT_ML ? {} : { credentials: "include" }),
         ...(data && { body: JSON.stringify(data) }),
     }
 
@@ -22,7 +27,10 @@ async function mlRequest<T>(endpoint: string, data?: any): Promise<T> {
         throw new Error(result.detail || result.message || `ML request failed: ${response.status}`)
     }
 
-    // FastAPI returns data directly — NOT wrapped in { data: ... }
+    // Backend proxy returns { success, data }, while direct ML returns raw payload.
+    if (result && typeof result === "object" && "success" in result && "data" in result) {
+        return (result as { data: T }).data
+    }
     return result as T
 }
 
@@ -54,6 +62,7 @@ export interface ImageAnalysisResult {
         mean_brightness: number
         std_brightness: number
         channel_means: number[]
+        forensic_report?: string
     }
     method: string
     latency_ms: number
@@ -103,10 +112,30 @@ export const mlApi = {
         cert_b: { issuer_name?: string; recipient_name?: string; course_name?: string }
     }) => mlRequest<SimilarityResult>("/similarity", data),
 
-    analyzeImage: (data: {
+    analyzeImage: async (data: {
         image_base64: string
         certificate_id?: string
-    }) => mlRequest<ImageAnalysisResult>("/analyze-image", data),
+    }) => {
+        const res = await mlRequest<any>("/analyze-image", data)
+
+        // Normalize possible ML payload variants for UI compatibility.
+        const forensicReport = res?.analysis?.forensic_report ?? res?.forensic_report
+        const normalized: ImageAnalysisResult = {
+            certificate_id: res?.certificate_id ?? data.certificate_id ?? "unknown",
+            is_tampered: Boolean(res?.is_tampered),
+            tamper_probability: Number(res?.tamper_probability ?? 0),
+            confidence: Number(res?.confidence ?? 0),
+            analysis: {
+                mean_brightness: Number(res?.analysis?.mean_brightness ?? 0),
+                std_brightness: Number(res?.analysis?.std_brightness ?? 0),
+                channel_means: Array.isArray(res?.analysis?.channel_means) ? res.analysis.channel_means : [],
+                ...(forensicReport ? { forensic_report: forensicReport } : {}),
+            },
+            method: res?.method ?? "image-analysis",
+            latency_ms: Number(res?.latency_ms ?? 0),
+        }
+        return normalized
+    },
 
     chat: (data: {
         message: string
