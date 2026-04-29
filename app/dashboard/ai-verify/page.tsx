@@ -354,10 +354,6 @@ function ChatPanel({ onResult, setLogs }: { onResult: (r: any) => void; setLogs:
         <div className="w-5 h-5 bg-indigo-600 rounded-md flex items-center justify-center flex-shrink-0">
           <Brain className="w-3 h-3 text-white" />
         </div>
-        <div className="min-w-0">
-          <p className="text-xs font-bold text-indigo-800 truncate">Groq LLaMA-3.1 (70B)</p>
-          <p className="text-[10px] text-indigo-500 truncate">Certificate-domain fine-tuned</p>
-        </div>
         <span className="ml-auto text-[10px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5 flex-shrink-0">Live</span>
       </div>
 
