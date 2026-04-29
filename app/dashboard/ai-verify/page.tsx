@@ -142,9 +142,9 @@ function fileToBase64(file: File): Promise<string> {
 }
 
 const TABS = [
-  { id: "fraud", label: "Fraud Detection", icon: ShieldCheck },
+  // { id: "fraud", label: "Fraud Detection", icon: ShieldCheck },
   { id: "image", label: "Image Analysis", icon: ImageIcon },
-  { id: "similarity", label: "Similarity Check", icon: GitCompare },
+  // { id: "similarity", label: "Similarity Check", icon: GitCompare },
   { id: "chat", label: "AI Chat", icon: MessageSquare },
 ] as const
 type Tab = typeof TABS[number]["id"]
