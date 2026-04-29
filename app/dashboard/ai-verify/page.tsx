@@ -598,7 +598,7 @@ function ResultPanel({ result, activeTab }: { result: any; activeTab: Tab }) {
 
 // ── Main page ─────────────────────────────────────────────
 export default function AIVerifyPage() {
-  const [activeTab, setActiveTab] = useState<Tab>("fraud")
+  const [activeTab, setActiveTab] = useState<Tab>("image")
   const [logs, setLogs] = useState<string[]>([])
   const [result, setResult] = useState<any>(null)
 
@@ -635,10 +635,7 @@ export default function AIVerifyPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {activeTab === "fraud" && <FraudForm onResult={setResult} setLogs={setLogs} />}
-                    {(activeTab === "image" || activeTab === "similarity") && (
-                      <ImageUploadPanel onResult={setResult} setLogs={setLogs} tab={activeTab} />
-                    )}
+                    {activeTab === "image" && <ImageUploadPanel onResult={setResult} setLogs={setLogs} tab="image" />}
                     {activeTab === "chat" && <ChatPanel onResult={setResult} setLogs={setLogs} />}
                   </CardContent>
                 </Card>
