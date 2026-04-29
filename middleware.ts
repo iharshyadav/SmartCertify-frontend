@@ -25,8 +25,11 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   
   const token = request.cookies.get('certify_token')?.value
-  
-  const isAuthenticated = !!token;
+  const userCookie = request.cookies.get('certify_user')?.value
+
+  // In production, auth tokens are HttpOnly cookies on the backend domain.
+  // For frontend route protection, rely on local user cookie fallback.
+  const isAuthenticated = Boolean(token || userCookie)
 
   if (publicRoutes.some(route => pathname === route)) {
     return NextResponse.next()
