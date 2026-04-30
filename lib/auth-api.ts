@@ -7,7 +7,9 @@ import {
 } from "./auth-types"
 import { apiHelpers } from "./auth-utils"
 
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/users` || "http://localhost:8000/api/users"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
+  ? `${process.env.NEXT_PUBLIC_API_URL}/users`
+  : "http://localhost:8000/api/users"
 
 export class ApiResponseError extends Error {
   status: number
@@ -37,6 +39,7 @@ export class ApiClient {
     const config: RequestInit = {
       headers: {
         "Content-Type": "application/json",
+        ...apiHelpers.getAuthHeader(),
         ...options.headers
       },
       credentials: 'include', // Include cookies in all requests

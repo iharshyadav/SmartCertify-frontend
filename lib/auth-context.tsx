@@ -108,6 +108,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: response.user.email,
         username: response.user.username
       })
+      // Also save tokens for Authorization header fallback on protected APIs.
+      sessionManager.saveSession(response.token, response.refreshToken, {
+        id: response.user.id,
+        email: response.user.email,
+        username: response.user.username
+      })
 
       return response
     } catch (error) {
@@ -142,6 +148,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Still save user data to client-accessible cookie for UI purposes
       userManager.setUser({
+        id: response.user.id,
+        email: response.user.email,
+        username: response.user.username
+      })
+      // Also save tokens for Authorization header fallback on protected APIs.
+      sessionManager.saveSession(response.token, response.refreshToken, {
         id: response.user.id,
         email: response.user.email,
         username: response.user.username
@@ -184,6 +196,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: response.user.email,
         username: response.user.username
       })
+      // Also save tokens for Authorization header fallback on protected APIs.
+      sessionManager.saveSession(response.token, response.refreshToken, {
+        id: response.user.id,
+        email: response.user.email,
+        username: response.user.username
+      })
 
       return response
     } catch (error) {
@@ -207,7 +225,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
     
     // Clear client-side user data
-    userManager.removeUser()
+    sessionManager.clearSession()
     setState({
       user: null,
       token: null,
