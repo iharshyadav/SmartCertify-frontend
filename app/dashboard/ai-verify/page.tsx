@@ -104,13 +104,18 @@ function LogReadout({ logs, result }: { logs: string[]; result?: any }) {
 function JsonViewer({ data }: { data: any }) {
   const [open, setOpen] = useState(false)
   if (!data) return null
+
+  // Filter out the "method" key from the display
+  const displayData = { ...data }
+  delete displayData.method
+
   return (
     <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
       <button onClick={() => setOpen(!open)} className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors">
         <div className="flex items-center gap-2"><FileText className="w-4 h-4 text-slate-400" /><span>Raw JSON Response</span></div>
         {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
       </button>
-      {open && <pre className="p-4 text-xs font-mono text-blue-700 bg-blue-50 overflow-x-auto max-h-[280px] overflow-y-auto border-t border-slate-200">{JSON.stringify(data, null, 2)}</pre>}
+      {open && <pre className="p-4 text-xs font-mono text-blue-700 bg-blue-50 overflow-x-auto max-h-[280px] overflow-y-auto border-t border-slate-200">{JSON.stringify(displayData, null, 2)}</pre>}
     </div>
   )
 }
