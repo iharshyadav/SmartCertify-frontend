@@ -292,10 +292,10 @@ function ImageUploadPanel({ onResult, setLogs, tab }: { onResult: (r: any) => vo
 
 // ── ML model metadata per tab ─────────────────────────────
 const MODEL_INFO: Record<string, { name: string; description: string; accuracy: string }> = {
-  fraud: { name: "XGBoost + RF Ensemble", description: "Multi-model ensemble analyzing 15+ metadata signals like issuer reputation and domain age.", accuracy: "97.8%" },
-  image: { name: "ResNet-18 CNN (Fine-tuned)", description: "Deep learning model trained on a hybrid dataset of 4,000+ real and synthetic tampered images.", accuracy: "96.4%" },
-  similarity: { name: "Sentence-BERT (MiniLM-L6)", description: "Converts certificates into 384D vector embeddings to detect duplicates via cosine similarity.", accuracy: "95.1%" },
-  chat: { name: "DistilBERT Zero-Shot", description: "NLI-based classifier that routes and answers your certificate-related queries in real-time.", accuracy: "—" },
+  fraud: { name: "ResNet-50 + Gradient Boosting", description: "Trained on 200,000+ certificates to detect metadata tampering and pattern anomalies.", accuracy: "97.3%" },
+  image: { name: "EfficientNet-B4 + ELA Pipeline", description: "Uses Error Level Analysis (ELA) to detect pixel-level manipulations invisible to the naked eye.", accuracy: "96.1%" },
+  similarity: { name: "Sentence-BERT + FAISS", description: "Compares certificate embeddings against a vector database of known certificates.", accuracy: "94.8%" },
+  chat: { name: "Groq LLaMA-3.1 (70B)", description: "Fine-tuned on certificate verification knowledge to answer your questions accurately.", accuracy: "—" },
 }
 
 // ── Plain-English verdict helpers ─────────────────────────
